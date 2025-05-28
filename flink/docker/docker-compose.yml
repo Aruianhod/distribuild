@@ -1,0 +1,89 @@
+version: '3'
+services:
+  jobmanager:
+    image: flink:latest
+    container_name: jobmanager
+    ports:
+      - "8081:8081"
+    command: jobmanager
+    environment:
+      - JOB_MANAGER_RPC_ADDRESS=jobmanager
+      - |
+        FLINK_PROPERTIES=
+        jobmanager.rpc.address: jobmanager
+        jobmanager.memory.process.size: 4096m
+        state.backend: rocksdb
+        state.checkpoints.dir: file:///opt/flink/checkpoints
+        execution.checkpointing.interval: 60000
+        execution.checkpointing.mode: EXACTLY_ONCE
+    volumes:
+      - ./config/flink-conf.yaml:/opt/flink/conf/flink-conf.yaml
+      - flink_checkpoints:/opt/flink/checkpoints
+    networks:
+      - flink-network
+
+  taskmanager1:
+    image: flink:latest
+    container_name: taskmanager1
+    depends_on:
+      - jobmanager
+    command: taskmanager
+    environment:
+      - JOB_MANAGER_RPC_ADDRESS=jobmanager
+      - |
+        FLINK_PROPERTIES=
+        taskmanager.numberOfTaskSlots: 4
+        taskmanager.memory.process.size: 8192m
+        taskmanager.memory.task.heap.size: 4096m
+        taskmanager.memory.managed.size: 2048m
+    volumes:
+      - ./config/flink-conf.yaml:/opt/flink/conf/flink-conf.yaml
+    networks:
+      - flink-network
+
+  taskmanager2:
+    image: flink:latest
+    container_name: taskmanager2
+    depends_on:
+      - jobmanager
+    command: taskmanager
+    environment:
+      - JOB_MANAGER_RPC_ADDRESS=jobmanager
+      - |
+        FLINK_PROPERTIES=
+        taskmanager.numberOfTaskSlots: 4
+        taskmanager.memory.process.size: 8192m
+        taskmanager.memory.task.heap.size: 4096m
+        taskmanager.memory.managed.size: 2048m
+    volumes:
+      - ./config/flink-conf.yaml:/opt/flink/conf/flink-conf.yaml
+    networks:
+      - flink-network
+
+  taskmanager3:
+    image: flink:latest
+    container_name: taskmanager3
+    depends_on:
+      - jobmanager
+    command: taskmanager
+    environment:
+      - JOB_MANAGER_RPC_ADDRESS=jobmanager
+      - |
+        FLINK_PROPERTIES=
+        taskmanager.numberOfTaskSlots: 4
+        taskmanager.memory.process.size: 8192m
+        taskmanager.memory.task.heap.size: 4096m
+        taskmanager.memory.managed.size: 2048m
+    volumes:
+      - ./config/flink-conf.yaml:/opt/flink/conf/flink-conf.yaml
+    networks:
+      - flink-network
+
+networks:
+  flink-network:
+    driver: bridge
+    external: true
+    name: kafka-network
+
+volumes:
+  flink_checkpoints:
